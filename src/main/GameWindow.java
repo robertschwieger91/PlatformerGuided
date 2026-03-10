@@ -1,6 +1,6 @@
 package main;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class GameWindow {
     private JFrame jframe;
