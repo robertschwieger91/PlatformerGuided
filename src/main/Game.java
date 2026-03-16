@@ -1,8 +1,9 @@
 package main;
 
-import entities.Player;
+import java.awt.Graphics;
 
-import java.awt.*;
+import entities.Player;
+import levels.LevelManager;
 
 public class Game implements Runnable {
 
@@ -11,8 +12,16 @@ public class Game implements Runnable {
 	private Thread gameThread;
 	private final int FPS_SET = 120;
 	private final int UPS_SET = 200;
-
 	private Player player;
+	private LevelManager levelManager;
+
+	public final static int TILES_DEFAULT_SIZE = 32;
+	public final static float SCALE = 2f;
+	public final static int TILES_IN_WIDTH = 26;
+	public final static int TILES_IN_HEIGHT = 14;
+	public final static int TILES_SIZE = (int) (TILES_DEFAULT_SIZE * SCALE);
+	public final static int GAME_WIDTH = TILES_SIZE * TILES_IN_WIDTH;
+	public final static int GAME_HEIGHT = TILES_SIZE * TILES_IN_HEIGHT;
 
 	public Game() {
 		initClasses();
@@ -22,11 +31,11 @@ public class Game implements Runnable {
 		gamePanel.requestFocus();
 
 		startGameLoop();
-
 	}
 
 	private void initClasses() {
-		player = new Player(200, 200);
+		player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
+		levelManager = new LevelManager(this);
 	}
 
 	private void startGameLoop() {
@@ -34,22 +43,21 @@ public class Game implements Runnable {
 		gameThread.start();
 	}
 
-	public void update(){
+	public void update() {
+		levelManager.update();
 		player.update();
 	}
 
 	public void render(Graphics g) {
+		levelManager.draw(g);
 		player.render(g);
 	}
-
 
 	@Override
 	public void run() {
 
 		double timePerFrame = 1000000000.0 / FPS_SET;
 		double timePerUpdate = 1000000000.0 / UPS_SET;
-		long lastFrame = System.nanoTime();
-		long now = System.nanoTime();
 
 		long previousTime = System.nanoTime();
 
@@ -61,7 +69,6 @@ public class Game implements Runnable {
 		double deltaF = 0;
 
 		while (true) {
-			now = System.nanoTime();
 			long currentTime = System.nanoTime();
 
 			deltaU += (currentTime - previousTime) / timePerUpdate;
@@ -82,9 +89,10 @@ public class Game implements Runnable {
 
 			if (System.currentTimeMillis() - lastCheck >= 1000) {
 				lastCheck = System.currentTimeMillis();
-				System.out.println("FPS: " + frames + " || " + updates);
+				System.out.println("FPS: " + frames + " | UPS: " + updates);
 				frames = 0;
 				updates = 0;
+
 			}
 		}
 
